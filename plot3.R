@@ -1,4 +1,4 @@
-# Plot 2 (script)
+# Plot 3 (script)
 
 rm(list = ls())
 graphics.off()
@@ -51,17 +51,24 @@ NEI <- NEI %>%
 
 ## Convert variables & create new variables 
 NEI <- NEI %>% 
-  mutate(Emissions.log = log10(Emissions)) # logarithm (10) of emissions
+  mutate(Emissions.log = log10(Emissions),  # logarithm (10) of emissions
+         type = factor(type, levels = c("POINT", "NONPOINT", "ON-ROAD", "NON-ROAD"))) # convert type to factor and set levels manually
 
 ## Filter rows (Data for Baltimore)
 NEI.Baltimore <- NEI %>% filter(fips == "24510")
 
 # Create plot & save it to .png
-png(filename = "plot2.png", width = 800, height = 600, units = "px")
-boxplot(Emissions.log ~ year, 
-        data = NEI.Baltimore,
-        main = "Baltimore City emissions over the years",
-        xlab = "Year",
-        ylab = "Total emissions (PM2.5) - log10 scale",
-        cex.lab = 1.5, cex.axis = 1.5, cex.main = 1.5, cex.sub = 1.5)
-dev.off()
+NEI.Baltimore %>% 
+  ggplot(aes(x = year, y = Emissions.log, color = type)) +
+  geom_point() +
+  stat_summary(fun = median, geom = "line", size = 2) +
+  scale_x_continuous(breaks = NEI.Baltimore %>% pull(year) %>% unique() %>% sort()) +
+  facet_grid(. ~ type) +
+  scale_color_viridis_d() +
+  ggtitle("Baltimore City emissions over the years (break down by type) - added yearly median values (lines)") +
+  xlab("Year") +
+  ylab ("Total emissions (PM2.5) - log10 scale") +
+  theme(text = element_text(size = 15))
+
+ggsave(filename = "plot3.png", plot = last_plot(), 
+       device = "png", width = 16, height = 8, dpi = 300, units = "in")

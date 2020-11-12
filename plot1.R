@@ -4,7 +4,7 @@ rm(list = ls())
 graphics.off()
 
 # Load R packages
-packages <- c("dplyr", "ggplot2", "lubridate") # list of packages to load
+packages <- c("dplyr", "ggplot2") # list of packages to load
 
 package.check <- lapply( # load or install & load list of packages
   packages,
