@@ -1,4 +1,4 @@
-# Plot 1 (script)
+# Plot 2 (script)
 
 rm(list = ls())
 graphics.off()
@@ -49,15 +49,18 @@ NEI <- NEI %>%
             y = SCC,
             by = "SCC")
 
-## Convert variables & create new variables
+## Convert variables & create new variables 
 NEI <- NEI %>% 
   mutate(Emissions.log = log10(Emissions)) # logarithm (10) of emissions
 
+## Filter rows (Data for Baltimore)
+NEI.Baltimore <- NEI %>% filter(fips == "24510")
+
 # Create plot & save it to .png
-png(filename = "plot1.png", width = 800, height = 600, units = "px")
+png(filename = "plot2.png", width = 800, height = 600, units = "px")
 boxplot(Emissions.log ~ year, 
-        data = NEI,
-        main = "US emissions over the years",
+        data = NEI.Baltimore,
+        main = "Baltimore City emissions over the years",
         xlab = "Year",
         ylab = "Total emissions (PM2.5) - log10 scale",
         cex.lab = 1.5, cex.axis = 1.5, cex.main = 1.5, cex.sub = 1.5)
