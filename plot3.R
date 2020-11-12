@@ -61,14 +61,15 @@ NEI.Baltimore <- NEI %>% filter(fips == "24510")
 NEI.Baltimore %>% 
   ggplot(aes(x = year, y = Emissions.log, color = type)) +
   geom_point() +
-  stat_summary(fun = median, geom = "line", size = 2) +
+  stat_summary(fun = median, geom = "line", size = 1.5) +
   scale_x_continuous(breaks = NEI.Baltimore %>% pull(year) %>% unique() %>% sort()) +
   facet_grid(. ~ type) +
   scale_color_viridis_d() +
   ggtitle("Baltimore City emissions over the years (break down by type) - added yearly median values (lines)") +
   xlab("Year") +
   ylab ("Total emissions (PM2.5) - log10 scale") +
-  theme(text = element_text(size = 15))
+  theme(text = element_text(size = 8),
+        legend.position = "none")
 
 ggsave(filename = "plot3.png", plot = last_plot(), 
-       device = "png", width = 16, height = 8, dpi = 300, units = "in")
+       device = "png", width = 20, height = 12, dpi = 250, units = "cm")
