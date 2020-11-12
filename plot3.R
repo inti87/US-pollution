@@ -60,8 +60,8 @@ NEI.Baltimore <- NEI %>% filter(fips == "24510")
 # Create plot & save it to .png
 NEI.Baltimore %>% 
   ggplot(aes(x = year, y = Emissions.log, color = type)) +
-  geom_point() +
-  stat_summary(fun = median, geom = "line", size = 1.5) +
+  geom_point(alpha = 1/2, size = 1) +
+  stat_summary(fun = median, geom = "line", size = 0.9) +
   scale_x_continuous(breaks = NEI.Baltimore %>% pull(year) %>% unique() %>% sort()) +
   facet_grid(. ~ type) +
   scale_color_viridis_d() +
