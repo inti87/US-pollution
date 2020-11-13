@@ -81,7 +81,7 @@ NEI.coal <- NEI %>% filter(target_rows == T)
 
 # Create plot & save it to .png
 NEI.coal %>% 
-  ggplot(aes(x = as.factor(year), y = Emissions.log, )) +
+  ggplot(aes(x = as.factor(year), y = Emissions.log)) +
   geom_boxplot() +
   ggtitle("US coal combustion-related sources emissions over the years") +
   xlab("Year") +

@@ -1,4 +1,4 @@
-# Plot 5 (script)
+# Plot 6 (script)
 
 rm(list = ls())
 graphics.off()
@@ -75,21 +75,23 @@ NEI %>% filter(target_rows == T) %>% nrow()
 NEI %>% filter(target_rows == T) %>%  count(Short.Name, target_rows)
 NEI %>% filter(target_rows == T) %>% count(fips)
 NEI %>% filter(target_rows == T) %>% count(year)
-NEI %>% filter(target_rows == T & fips == "24510") %>% count(year)
+NEI %>% filter(target_rows == T & fips %in% c("24510", "06037")) %>% count(year, fips)
 
 ## Filter Baltimore & motor vehicle sources 
-NEI.Baltimore.motor <- NEI %>% filter(target_rows == T & fips == "24510")
+NEI.Baltimore_LA.motor <- NEI %>% 
+  filter(target_rows == T & fips %in% c("24510", "06037")) %>% 
+  mutate(county = case_when(fips == "24510" ~ "Baltimore City",
+                            fips == "06037" ~ "Los Angeles County"))
 
 
 # Create plot & save it to .png
-NEI.Baltimore.motor %>% 
-  ggplot(aes(x = as.factor(year), y = Emissions.log)) +
+NEI.Baltimore_LA.motor %>% 
+  ggplot(aes(x = as.factor(year), y = Emissions.log, fill = county)) +
   geom_boxplot() +
-  ggtitle("Baltimore City motor vehicle sources related emissions over the years") +
+  ggtitle("Baltimore City & Los Angeles County - motor vehicle sources related emissions over the years") +
   xlab("Year") +
   ylab ("Total emissions (PM2.5) - log10 scale") +
-  theme(text = element_text(size = 8),
-        legend.position = "none")
+  theme(text = element_text(size = 8))
 
-ggsave(filename = "plot5.png", plot = last_plot(), 
-       device = "png", width = 20, height = 12, dpi = 250, units = "cm")
+ggsave(filename = "plot6.png", plot = last_plot(), 
+       device = "png", width = 25, height = 12, dpi = 250, units = "cm")
