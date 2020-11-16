@@ -49,11 +49,6 @@ NEI <- NEI %>%
             y = SCC,
             by = "SCC")
 
-## Convert variables & create new variables 
-NEI <- NEI %>% 
-  mutate(Emissions.log = log10(Emissions),  # logarithm (10) of emissions
-         type = factor(type, levels = c("POINT", "NONPOINT", "ON-ROAD", "NON-ROAD"))) # convert type to factor and set levels manually
-
 ## Try to find - coal combustion-related sources (using source classification columns)
 SCC %>% head()
 SCC %>% pull(Short.Name) %>% tolower() %>% str_subset(string = ., pattern = "coal") %>% unique()
@@ -78,16 +73,20 @@ NEI %>% filter(target_rows == T) %>% count(year)
 ## Filter coal - coal combustion-related sources
 NEI.coal <- NEI %>% filter(target_rows == T)
 
+## Create aggregation - total emissions
+NEI.coal.tot <- NEI.coal %>% 
+  group_by(year, target_rows) %>% 
+  summarise(emission_tot = sum(Emissions)) %>% 
+  ungroup()
 
 # Create plot & save it to .png
-NEI.coal %>% 
-  ggplot(aes(x = as.factor(year), y = Emissions.log)) +
-  geom_boxplot() +
+NEI.coal.tot %>% 
+  ggplot(aes(x = as.factor(year), y = emission_tot/1000)) +
+  geom_col(color = "black", fill = "gray67") +
   ggtitle("US coal combustion-related sources emissions over the years") +
   xlab("Year") +
-  ylab ("Total emissions (PM2.5) - log10 scale") +
+  ylab ("Total emissions in kilotons (1000 X tons)") +
   theme(text = element_text(size = 8),
         legend.position = "none")
-
 ggsave(filename = "plot4.png", plot = last_plot(), 
        device = "png", width = 20, height = 12, dpi = 250, units = "cm")

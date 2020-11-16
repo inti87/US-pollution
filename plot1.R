@@ -49,16 +49,19 @@ NEI <- NEI %>%
             y = SCC,
             by = "SCC")
 
-## Convert variables & create new variables
-NEI <- NEI %>% 
-  mutate(Emissions.log = log10(Emissions)) # logarithm (10) of emissions
+## Create aggregation - total emissions
+NEI.tot <- NEI %>% 
+  group_by(year) %>% 
+  summarise(emission_tot = sum(Emissions)) %>% 
+  ungroup()
 
 # Create plot & save it to .png
 png(filename = "plot1.png", width = 800, height = 600, units = "px")
-boxplot(Emissions.log ~ year, 
-        data = NEI,
+barplot(names = NEI.tot$year, 
+        height = NEI.tot$emission_tot / 1000,
         main = "US emissions over the years",
-        xlab = "Year",
-        ylab = "Total emissions (PM2.5) - log10 scale",
+        xlab = "Year", 
+        ylab = "Total emissions in kilotons (1000 X tons)",
         cex.lab = 1.5, cex.axis = 1.5, cex.main = 1.5, cex.sub = 1.5)
+
 dev.off()

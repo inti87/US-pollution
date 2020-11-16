@@ -49,19 +49,21 @@ NEI <- NEI %>%
             y = SCC,
             by = "SCC")
 
-## Convert variables & create new variables 
-NEI <- NEI %>% 
-  mutate(Emissions.log = log10(Emissions)) # logarithm (10) of emissions
-
 ## Filter rows (Data for Baltimore)
 NEI.Baltimore <- NEI %>% filter(fips == "24510")
 
+## Create aggregation - total emissions
+NEI.Baltimore.tot <- NEI.Baltimore %>% 
+  group_by(fips, year) %>% 
+  summarise(emission_tot = sum(Emissions)) %>% 
+  ungroup()
+
 # Create plot & save it to .png
 png(filename = "plot2.png", width = 800, height = 600, units = "px")
-boxplot(Emissions.log ~ year, 
-        data = NEI.Baltimore,
+barplot(names = NEI.Baltimore.tot$year, 
+        height = NEI.Baltimore.tot$emission_tot,
         main = "Baltimore City emissions over the years",
         xlab = "Year",
-        ylab = "Total emissions (PM2.5) - log10 scale",
+        ylab = "Total emissions in tons",
         cex.lab = 1.5, cex.axis = 1.5, cex.main = 1.5, cex.sub = 1.5)
 dev.off()

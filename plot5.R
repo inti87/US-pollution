@@ -49,11 +49,6 @@ NEI <- NEI %>%
             y = SCC,
             by = "SCC")
 
-## Convert variables & create new variables 
-NEI <- NEI %>% 
-  mutate(Emissions.log = log10(Emissions),  # logarithm (10) of emissions
-         type = factor(type, levels = c("POINT", "NONPOINT", "ON-ROAD", "NON-ROAD"))) # convert type to factor and set levels manually
-
 ## Try to find - motor vehicle sources (using source classification columns)
 SCC %>% head()
 SCC %>% pull(Short.Name) %>% tolower() %>% str_subset(string = ., pattern = "motor") %>% unique()
@@ -80,16 +75,20 @@ NEI %>% filter(target_rows == T & fips == "24510") %>% count(year)
 ## Filter Baltimore & motor vehicle sources 
 NEI.Baltimore.motor <- NEI %>% filter(target_rows == T & fips == "24510")
 
+## Create aggregation - total emissions
+NEI.Baltimore.motor.tot <- NEI.Baltimore.motor %>% 
+  group_by(fips, year) %>% 
+  summarise(emission_tot = sum(Emissions)) %>% 
+  ungroup()
 
 # Create plot & save it to .png
-NEI.Baltimore.motor %>% 
-  ggplot(aes(x = as.factor(year), y = Emissions.log)) +
-  geom_boxplot() +
+NEI.Baltimore.motor.tot %>% 
+  ggplot(aes(x = as.factor(year), y = emission_tot)) +
+  geom_col(color = "black", fill = "gray67") +
   ggtitle("Baltimore City motor vehicle sources related emissions over the years") +
   xlab("Year") +
-  ylab ("Total emissions (PM2.5) - log10 scale") +
+  ylab("Total emissions in tons") +
   theme(text = element_text(size = 8),
         legend.position = "none")
-
 ggsave(filename = "plot5.png", plot = last_plot(), 
        device = "png", width = 20, height = 12, dpi = 250, units = "cm")

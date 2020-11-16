@@ -49,27 +49,31 @@ NEI <- NEI %>%
             y = SCC,
             by = "SCC")
 
-## Convert variables & create new variables 
+## Convert variables & create new factor variables 
 NEI <- NEI %>% 
-  mutate(Emissions.log = log10(Emissions),  # logarithm (10) of emissions
-         type = factor(type, levels = c("POINT", "NONPOINT", "ON-ROAD", "NON-ROAD"))) # convert type to factor and set levels manually
+  mutate(type = factor(type, levels = c("POINT", "NONPOINT", "ON-ROAD", "NON-ROAD"))) # convert type to factor and set levels manually
 
 ## Filter rows (Data for Baltimore)
 NEI.Baltimore <- NEI %>% filter(fips == "24510")
 
+## Create aggregation - total emissions
+NEI.Baltimore.Type.tot <- NEI.Baltimore %>% 
+  group_by(fips, year, type) %>% 
+  summarise(emission_tot = sum(Emissions)) %>% 
+  ungroup()
+
+
 # Create plot & save it to .png
-NEI.Baltimore %>% 
-  ggplot(aes(x = year, y = Emissions.log, color = type)) +
-  geom_point(alpha = 1/2, size = 1) +
-  stat_summary(fun = median, geom = "line", size = 0.9) +
+NEI.Baltimore.Type.tot %>% 
+  ggplot(aes(x = year, y = emission_tot, fill = type)) +
+  geom_col(position = "dodge", color = "black") +
   scale_x_continuous(breaks = NEI.Baltimore %>% pull(year) %>% unique() %>% sort()) +
   facet_grid(. ~ type) +
   scale_color_viridis_d() +
-  ggtitle("Baltimore City emissions over the years (break down by type) - added yearly median values (lines)") +
+  ggtitle("Baltimore City emissions over the years (break down by type)") +
   xlab("Year") +
-  ylab ("Total emissions (PM2.5) - log10 scale") +
+  ylab("Total emissions in tons") +
   theme(text = element_text(size = 8),
         legend.position = "none")
-
 ggsave(filename = "plot3.png", plot = last_plot(), 
        device = "png", width = 20, height = 12, dpi = 250, units = "cm")

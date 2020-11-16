@@ -49,11 +49,6 @@ NEI <- NEI %>%
             y = SCC,
             by = "SCC")
 
-## Convert variables & create new variables 
-NEI <- NEI %>% 
-  mutate(Emissions.log = log10(Emissions),  # logarithm (10) of emissions
-         type = factor(type, levels = c("POINT", "NONPOINT", "ON-ROAD", "NON-ROAD"))) # convert type to factor and set levels manually
-
 ## Try to find - motor vehicle sources (using source classification columns)
 SCC %>% head()
 SCC %>% pull(Short.Name) %>% tolower() %>% str_subset(string = ., pattern = "motor") %>% unique()
@@ -83,15 +78,20 @@ NEI.Baltimore_LA.motor <- NEI %>%
   mutate(county = case_when(fips == "24510" ~ "Baltimore City",
                             fips == "06037" ~ "Los Angeles County"))
 
+## Create aggregation - total emissions
+NEI.Baltimore_LA.motor.tot <- NEI.Baltimore_LA.motor %>% 
+  group_by(fips, county, year) %>% 
+  summarise(emission_tot = sum(Emissions)) %>% 
+  ungroup()
 
 # Create plot & save it to .png
-NEI.Baltimore_LA.motor %>% 
-  ggplot(aes(x = as.factor(year), y = Emissions.log, fill = county)) +
-  geom_boxplot() +
+NEI.Baltimore_LA.motor.tot %>% 
+  ggplot(aes(x = as.factor(year), y = emission_tot, fill = county)) +
+  geom_col(color = "black", position = "dodge") +
+  facet_wrap(county ~ ., scales = "free") +
   ggtitle("Baltimore City & Los Angeles County - motor vehicle sources related emissions over the years") +
   xlab("Year") +
-  ylab ("Total emissions (PM2.5) - log10 scale") +
+  ylab("Total emissions in tons") +
   theme(text = element_text(size = 8))
-
 ggsave(filename = "plot6.png", plot = last_plot(), 
        device = "png", width = 25, height = 12, dpi = 250, units = "cm")
